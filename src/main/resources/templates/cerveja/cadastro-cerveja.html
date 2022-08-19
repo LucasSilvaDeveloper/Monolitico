@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout-padrao}">
+<head>
+	<title>Cadastro de Cerveja</title>
+	<link rel="stylesheet" type="text/css" th:href="@{/layout/stylesheets/uikit.min.css}" />
+</head>
+<body>
+		
+	<section class="aw-layout-content  js-content" layout:fragment="conteudo">
+
+			<div class="page-header">
+				<div class="container-fluid">
+					<h1>
+						Cadastro de Cerveja
+					</h1>
+				</div>
+			</div>
+	
+			<div class="container-fluid">
+
+				<div th:replace="fragments/mensagens-sucesso-salvar :: sucesso-save"></div>
+		
+				<form method="POST" th:object="${cerveja}" class="form-vertical  js-form-loading">
+				
+					<div th:replace="fragments/mensagens-erro-validacao :: errors"></div>
+				
+					<div class="row">
+						<div class="col-sm-3">
+							<div class="form-group" th:classappend="${#fields.hasErrors('sku')} ? has-error">
+								<label for="sku">SKU</label>
+								<input id="sku" type="text" class="form-control" th:field="*{sku}"/>
+							</div>
+						</div>
+						<div class="col-sm-9">
+							<div class="form-group" th:classappend="${#fields.hasErrors('nome')} ? has-error">
+								<label for="nome">Nome</label>
+								<input id="nome" type="text" class="form-control" th:field="*{nome}"/>
+							</div>
+						</div>
+					</div>
+		
+					<div class="form-group" th:classappend="${#fields.hasErrors('descricao')} ? has-error">
+						<label for="descricao">Descrição</label>
+						<textarea id="descricao" rows="3" class="form-control" th:field="*{descricao}"></textarea>
+					</div>
+		
+					<div class="row">
+						<div class="col-sm-3 form-group" th:classappend="${#fields.hasErrors('estilo')} ? has-error">
+							<label for="estilo">Estilo</label>
+							<div class="loja-field-action">
+								<select id="estilo" class="form-control" th:name="estilo" th:field="*{estilo}">
+									<option value="">Selecione o estilo</option> 
+									<option th:each="estilo : ${estilos}" th:value="${estilo.id}" th:text="${estilo.nome}" th:name="estilo.nome"></option> 
+								</select>
+								<div class="loja-field-action-icon">
+									<a href="#" data-toggle="modal" data-target="#modalCadastoRapidoEstilo" >
+										<i class="glyphicon glyphicon-plus-sign loja-glyphicon-large"></i>
+									</a>
+								</div>
+							</div>
+						</div>
+						
+						<div class="col-sm-3 form-group" th:classappend="${#fields.hasErrors('sabor')} ? has-error">
+							<label for="sabor">Sabor</label>
+							<select id="sabor" class="form-control" th:value="*{sabor}" th:name="sabor" th:field="*{sabor}">
+								<option value="">Selecione o sabor</option> 
+								<option th:each="sabor : ${sabores}" th:value="${sabor}" th:text="${sabor.descricao}" th:name="sabor.descricao"></option> 
+							</select>
+						</div>
+						<div class="col-sm-3 form-group" th:classappend="${#fields.hasErrors('teorAlcoolico')} ? has-error">
+							<label for="teorAlcoolico">Teor Alcoolico</label>
+							<div class="input-group">
+								<input id="teorAlcoolico" type="text" class="form-control js-porcentagem" th:value="*{teorAlcoolico}" th:name="teorAlcoolico" th:maxlength="2"/>
+								<div class="input-group-addon">%</div>
+							</div>
+						</div>
+						<div class="col-sm-6 col-lg-3 form-group">
+							<label for="Origem">Origem</label>
+							<div>
+								<th:block th:each="origem : ${origens}">
+									<div class="radio radio-inline">
+										<input th:id="|id_${origem}|" type="radio" name="origem" th:value="*{origem}" th:name="origem">
+										<label th:for="|id_${origem}|" th:text="${origem.descricao}"></label>
+									</div>
+								</th:block>
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-sm-3 form-group " th:classappend="${#fields.hasErrors('valor')} ? has-error">
+							<label for="preco">Valor</label>
+							<div class="input-group">
+								<div class="input-group-addon">R$</div>
+								<input id="valor" type="text" class="form-control js-money" th:field="*{valor}"/>
+							</div>
+						</div>
+						<div class="col-sm-3 form-group">
+							<label for="comissao">Comissão</label>
+							<div class="input-group">
+								<input id="comissao" type="text" class="form-control js-porcentagem" th:value="*{comissao}" th:name="comissao" th:maxlength="2"/>
+								<div class="input-group-addon">%</div>
+							</div>
+						</div>
+						<div class="col-sm-3 form-group">
+							<label for="estoque">Estoque</label>
+							<input id="estoque" type="text" class="form-control js-estoque" th:value="*{quantidadeEstoque}" th:name="quantidadeEstoque" th:maxlength="9"/>
+						</div>
+					</div>
+					
+					<div class="row">
+						<div class="form-group col-sm-12">
+							
+							<input type="hidden" th:field="*{foto}">
+							<input type="hidden" th:field="*{contentType}">
+						
+							<label class="control-label">Foto</label>
+							<div id="upload-drop" class="js-upload uk-placeholder uk-text-center">
+								<span uk-icon="icon: cloud-upload"></span>
+   								<span class="uk-text-middle">Araste o arquivo aqui</span>
+								<div uk-form-custom>
+								    <input type="file" accept=".jpg,.jpeg,.png">
+								    <span class="uk-link">Selecione</span>
+   								</div>
+							</div>
+						</div>
+						<progress id="js-progressbar" class="uk-progress" value="0" max="100" hidden></progress>
+					</div>
+				
+					<div class="form-group">
+						<button class="btn  btn-primary" type="submit">Salvar</button>
+					</div>
+				</form>
+			</div>
+			
+			<div th:replace="modal/cadastro-estilo-modal-rapido :: modal"></div>
+			
+		</section>
+	
+	<th:block layout:fragment="javascript-extra">
+		<script th:src="@{/js/estilo.cadastro-rapido.js}"></script>
+		<script>
+
+		    var bar = document.getElementById('js-progressbar');
+		
+		    UIkit.upload('.js-upload', {
+				
+		    	type: 'json',
+		        filelimit: 1,
+		        allow: '*(jpg|jpeg|png)',
+		        url: '/foto/upload',
+		
+		        beforeSend: function () {
+		        },
+		        beforeAll: function () {
+		        },
+		        load: function () {
+		        },
+		        error: function () {
+		        },
+		        complete: function (resposta) {
+		        	$('input[name=foto]').val(resposta.response.nome);
+		        	$('input[name=contentType]').val(resposta.response.contentType);
+		        },
+		
+		        loadStart: function (e) {
+		
+		            bar.removeAttribute('hidden');
+		            bar.max = e.total;
+		            bar.value = e.loaded;
+		        },
+		
+		        progress: function (e) {
+		
+		            bar.max = e.total;
+		            bar.value = e.loaded;
+		        },
+		
+		        loadEnd: function (e) {
+		
+		            bar.max = e.total;
+		            bar.value = e.loaded;
+		        },
+		
+		        completeAll: function () {
+		
+		            setTimeout(function () {
+		                bar.setAttribute('hidden', 'hidden');
+		            }, 1000);
+		
+		            alert('Upload Completed');
+		        }
+		
+		    });
+
+		</script>
+	</th:block>
+	
+</body>
+</html>
